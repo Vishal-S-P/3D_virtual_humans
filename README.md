@@ -159,14 +159,6 @@ Motion is retargeted using sequences from the **MOYO dataset**:
 
   * **Hand Geometry:** Fine hand and finger geometry may be incomplete due to reconstruction sparsity.
   * **Facial Expressions:** Limited by the quality of the initial scan.
-  * **Temporal Smoothing:** Currently, no temporal smoothing is applied across motion frames.
-
-## 🚀 Future Work
-
-  * [ ] Implement temporal consistency constraints during fitting.
-  * [ ] Improve hand reconstruction pipeline.
-  * [ ] Generate texture atlases for better realism.
-  * [ ] Enable real-time rendering via Vertex Animation Textures (VAT).
 
 -----
 
