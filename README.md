@@ -45,56 +45,28 @@ graph TD;
 ## 📁 Repository Structure
 
 ```text
-.
-├── reconstruction/
-│   ├── colmap_pipeline.py       # Handles multi-view stereo reconstruction
-│   └── point_cloud_refinement.py # SOR and noise filtering
-│
-├── mesh_processing/
-│   ├── poisson_reconstruction.py # Surface reconstruction
-│   ├── mesh_refinement.py        # Smoothing and cleaning
-│   └── mesh_decimation.py        # Triangle reduction
-│
-├── smplx_fitting/
-│   ├── fit_smplx.py             # Main optimization loop
-│   ├── loss_plot.py             # Visualization of loss curves
-│   └── debug_visualization.py   # Visual debugging tools
-│
-├── appearance_transfer/
-│   └── color_transfer.py        # Nearest neighbor color projection
-│
-├── motion_retargeting/
-│   └── retarget_moyo_motion.py  # Apply MOYO sequences to SMPL-X
-│
-├── assets/
-│   ├── images/                  # Input data
-│   ├── videos/                  # Output renders
-│   └── figures/                 # Readme assets
-│
-├── README.md
-└── requirements.txt
+```text
+3d_virtual_humans/
+├── 00_extract_frames.py         # Extract frames from input video
+├── 01_segment_save.py           # Generate foreground masks (YOLO + SAM)
+├── 02_refine_masks.py           # Refine and clean binary masks
+├── 03_3d_proj.py                # Run COLMAP/PyCOLMAP reconstruction
+├── 04_create_posson_mesh.py     # Poisson surface reconstruction
+├── 05_mesh_clean.py             # Mesh refinement, smoothing, decimation
+├── 06_mesh_to_simplx.py         # Fit SMPL-X model to the clean mesh
+├── 07_extract_colors_robust.py  # Transfer colors from scan to SMPL-X
+├── 08_motion_retarget.py        # Apply MOYO motion sequences
+├── 09_export_meshes.py          # Export final animated meshes/video
+├── download_moyo_data.py        # Helper to download specific sequences
+├── download_moyo.sh             # Shell script for MOYO dataset
+└── README.md
 ```
 
 -----
 
 ## 🔧 Installation
 
-### 1\. Environment Setup
-
-It is recommended to use Conda to manage the environment.
-
-```bash
-conda create -n human_motion python=3.9
-conda activate human_motion
-```
-
-### 2\. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-**Key Dependencies:**
+### 1\. Dependencies
 
   * `torch`
   * `smplx`
