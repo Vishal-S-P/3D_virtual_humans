@@ -1,222 +1,218 @@
-Human Motion Retargeting from RGB Images
+# Human Motion Retargeting from RGB Images
+
+![Python](https://img.shields.io/badge/Python-3.9-blue?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-Stable-EE4C2C?logo=pytorch&logoColor=white)
+![SMPL-X](https://img.shields.io/badge/Model-SMPL--X-green)
+![CUDA](https://img.shields.io/badge/CUDA-Enabled-76B900?logo=nvidia&logoColor=white)
 
 This repository presents an end-to-end pipeline for human motion retargeting, starting from raw RGB images and producing a fully animated, identity-preserving 3D human avatar. The system integrates multi-view 3D reconstruction, parametric human modeling with SMPL-X, appearance transfer, and motion retargeting using real motion data.
 
-The project was developed as part of STAT 59800: 3D Computer Vision & Virtual Human Models.
+**Context:** This project was developed as part of **STAT 59800: 3D Computer Vision & Virtual Human Models**.
 
-⸻
+<p align="center">
+  <img src="assets/videos/final_animation.gif" alt="Final Animation" width="600" />
+</p>
 
-✨ Highlights
-	•	📸 Image-based 3D reconstruction using COLMAP + PyCOLMAP (CUDA)
-	•	🧍 Parametric human fitting with SMPL-X via multi-stage optimization
-	•	🎨 Robust color transfer from reconstructed scans to SMPL-X
-	•	🧹 Point cloud & mesh refinement (SOR, noise filtering, Poisson reconstruction)
-	•	🏃 Motion retargeting using MOYO motion sequences
-	•	🎬 Final animated video output with preserved identity and appearance
+---
 
-⸻
+## ✨ Highlights
 
-🧠 Pipeline Overview
+* 📸 **Image-based 3D reconstruction** using COLMAP + PyCOLMAP (CUDA-accelerated).
+* 🧍 **Parametric human fitting** with SMPL-X via robust multi-stage optimization.
+* 🎨 **Appearance transfer** from reconstructed scans to SMPL-X using nearest-neighbor projection.
+* 🧹 **Mesh refinement** including SOR, noise filtering, and Poisson reconstruction.
+* 🏃 **Motion retargeting** utilizing MOYO motion sequences.
+* 🎬 **Identity preservation** in final animated video outputs.
 
-RGB Images
-   ↓
-Foreground Masking (YOLO + SAM)
-   ↓
-Multi-view Reconstruction (COLMAP / PyCOLMAP)
-   ↓
-Point Cloud Refinement (SOR + Noise Filtering)
-   ↓
-Poisson Surface Reconstruction
-   ↓
-Mesh Refinement & Triangle Decimation
-   ↓
-SMPL-X Fitting (Multi-stage Optimization)
-   ↓
-Color Transfer (Nearest Neighbor Projection)
-   ↓
-Motion Retargeting (MOYO)
-   ↓
-Final Animated Video
+---
 
+## 🧠 Pipeline Overview
 
-⸻
+```mermaid
+graph TD;
+    A[RGB Images] --> B[Foreground Masking<br/>YOLO + SAM];
+    B --> C[Multi-view Reconstruction<br/>COLMAP / PyCOLMAP];
+    C --> D[Point Cloud Refinement<br/>SOR + Noise Filtering];
+    D --> E[Poisson Surface Reconstruction];
+    E --> F[Mesh Refinement &<br/>Triangle Decimation];
+    F --> G[SMPL-X Fitting<br/>Multi-stage Optimization];
+    G --> H[Color Transfer<br/>NN Projection];
+    H --> I[Motion Retargeting<br/>MOYO];
+    I --> J[Final Animated Video];
+````
 
-📁 Repository Structure
+> **Note:** If the diagram above does not render, the flow is: RGB Images → Masking → COLMAP Reconstruction → Point Cloud Refinement → Poisson Mesh → Mesh Optimization → SMPL-X Fitting → Color Transfer → Motion Retargeting.
 
+-----
+
+## 📁 Repository Structure
+
+```text
 .
 ├── reconstruction/
-│   ├── colmap_pipeline.py
-│   └── point_cloud_refinement.py
+│   ├── colmap_pipeline.py       # Handles multi-view stereo reconstruction
+│   └── point_cloud_refinement.py # SOR and noise filtering
 │
 ├── mesh_processing/
-│   ├── poisson_reconstruction.py
-│   ├── mesh_refinement.py
-│   └── mesh_decimation.py
+│   ├── poisson_reconstruction.py # Surface reconstruction
+│   ├── mesh_refinement.py        # Smoothing and cleaning
+│   └── mesh_decimation.py        # Triangle reduction
 │
 ├── smplx_fitting/
-│   ├── fit_smplx.py
-│   ├── loss_plot.py
-│   └── debug_visualization.py
+│   ├── fit_smplx.py             # Main optimization loop
+│   ├── loss_plot.py             # Visualization of loss curves
+│   └── debug_visualization.py   # Visual debugging tools
 │
 ├── appearance_transfer/
-│   └── color_transfer.py
+│   └── color_transfer.py        # Nearest neighbor color projection
 │
 ├── motion_retargeting/
-│   └── retarget_moyo_motion.py
+│   └── retarget_moyo_motion.py  # Apply MOYO sequences to SMPL-X
 │
 ├── assets/
-│   ├── images/
-│   ├── videos/
-│   └── figures/
+│   ├── images/                  # Input data
+│   ├── videos/                  # Output renders
+│   └── figures/                 # Readme assets
 │
 ├── README.md
 └── requirements.txt
+```
 
+-----
 
-⸻
+## 🔧 Installation
 
-🔧 Installation
+### 1\. Environment Setup
 
-1. Environment Setup
+It is recommended to use Conda to manage the environment.
 
+```bash
 conda create -n human_motion python=3.9
 conda activate human_motion
+```
 
-2. Install Dependencies
+### 2\. Install Dependencies
 
+```bash
 pip install -r requirements.txt
+```
 
-Key dependencies include:
-	•	torch
-	•	smplx
-	•	trimesh
-	•	pycolmap
-	•	open3d
-	•	scikit-learn
+**Key Dependencies:**
 
-Note: PyCOLMAP with CUDA support is required for dense multi-view stereo.
+  * `torch`
+  * `smplx`
+  * `trimesh`
+  * `pycolmap` (Requires CUDA for dense reconstruction)
+  * `open3d`
+  * `scikit-learn`
 
-⸻
+-----
 
-📸 Foreground Masking
+## 📸 Foreground Masking
 
-Foreground human segmentation is achieved via a two-stage learning-based pipeline:
-	•	YOLO for coarse human detection (bounding boxes)
-	•	SAM (Segment Anything Model) for precise pixel-level masks
+Foreground human segmentation is achieved via a two-stage learning-based pipeline to remove background clutter and improve reconstruction quality:
 
-This step removes background clutter and significantly improves reconstruction quality.
+1.  **YOLO:** Used for coarse human detection (bounding boxes).
+2.  **SAM (Segment Anything Model):** Used for precise pixel-level masks within the bounding box.
 
-⸻
+## ☁️ 3D Reconstruction
 
-☁️ 3D Reconstruction
-	•	Multi-view images are reconstructed using COLMAP / PyCOLMAP (CUDA)
-	•	Outputs include camera poses, sparse points, and dense point clouds
-	•	Typical scale:
-	•	Initial points: ~8.3M
-	•	Refined points: ~1.2M
+  * **Engine:** COLMAP / PyCOLMAP (CUDA).
+  * **Outputs:** Camera poses, sparse point clouds, and dense point clouds.
+  * **Scale:**
+      * Initial points: \~8.3M
+      * Refined points: \~1.2M
 
-⸻
+## 🧹 Point Cloud & Mesh Processing
 
-🧹 Point Cloud & Mesh Processing
+**Point Cloud Refinement:**
 
-Point Cloud Refinement
-	•	Statistical Outlier Removal (SOR)
-	•	Noise filtering (CloudCompare-style)
+  * Statistical Outlier Removal (SOR).
+  * Noise filtering (CloudCompare-style).
 
-Mesh Construction
-	•	Poisson Surface Reconstruction (depth ≈ 9)
-	•	Produces watertight, manifold meshes
+**Mesh Construction:**
 
-Mesh Optimization
-	•	Laplacian smoothing
-	•	Removal of disconnected components
-	•	Triangle decimation (Quadric Edge Collapse)
-	•	~840K → ~200K faces
+  * **Method:** Poisson Surface Reconstruction (depth ≈ 9).
+  * **Result:** Watertight, manifold meshes.
 
-⸻
+**Mesh Optimization:**
 
-🧍 SMPL-X Fitting
+  * Laplacian smoothing.
+  * Removal of disconnected components.
+  * Triangle decimation (Quadric Edge Collapse) reducing \~840K to \~200K faces.
+
+-----
+
+## 🧍 SMPL-X Fitting
 
 We fit an SMPL-X model to the refined mesh using multi-stage gradient-based optimization.
 
-Optimization Stages
+### Optimization Schedule
 
-Stage	Parameters	Learning Rate	Iterations
-1	Global orient, translation, scale	0.01	150
-2	Shape (β)	0.01	250
-3	Pose (high reg)	0.005	300
-4	Pose refinement	0.002	400
-5	All parameters	0.001	200
+| Stage | Parameters Target | Learning Rate | Iterations |
+| :---: | :--- | :---: | :---: |
+| **1** | Global orient, translation, scale | 0.01 | 150 |
+| **2** | Shape ($\beta$) | 0.01 | 250 |
+| **3** | Pose (High Regularization) | 0.005 | 300 |
+| **4** | Pose Refinement | 0.002 | 400 |
+| **5** | All Parameters | 0.001 | 200 |
 
-	•	Loss: Bidirectional Chamfer distance
-	•	Regularization: Shape, pose, and hand priors
+  * **Loss Function:** Bidirectional Chamfer distance.
+  * **Regularization:** Priors applied to Shape, Pose, and Hands.
 
-⸻
+-----
 
-🎨 Appearance Transfer
+## 🎨 Appearance Transfer & Motion Retargeting
 
-Color is transferred from the reconstructed scan to the SMPL-X mesh via nearest-neighbor projection:
-	•	Scan and SMPL-X meshes are independently centered
-	•	Vertex colors are normalized to [0, 1]
-	•	k-NN projection (k = 1) in 3D space
+### Appearance Transfer
 
-This avoids UV mapping and remains robust to alignment offsets.
+Color is transferred from the reconstructed scan to the SMPL-X mesh via **Nearest-Neighbor Projection**:
 
-⸻
+1.  Scan and SMPL-X meshes are independently centered.
+2.  Vertex colors are normalized to `[0, 1]`.
+3.  $k$-NN projection ($k=1$) is performed in 3D space.
 
-🏃 Motion Retargeting (MOYO)
+<!-- end list -->
 
-Motion is retargeted using sequences from the MOYO dataset:
-	•	Pose representation: 165D fullpose
-	•	Body, hand, and jaw poses extracted explicitly
-	•	Shape (β) and scale fixed across all frames
-	•	Floor alignment via minimum vertex height
-	•	Frame-wise export as OBJ
+  * *Advantage:* Avoids complex UV mapping and remains robust to slight alignment offsets.
 
-⸻
+### Motion Retargeting (MOYO)
 
-🎬 Final Output
-	•	Colored SMPL-X avatar animated with retargeted motion
-	•	Rendered as a video (MP4) from exported frame sequence
+Motion is retargeted using sequences from the **MOYO dataset**:
 
-<p align="center">
-  <img src="assets/videos/final_animation.gif" width="600" />
-</p>
+  * **Pose Representation:** 165D fullpose.
+  * **Explicit Extraction:** Body, hand, and jaw poses are extracted explicitly.
+  * **Constraints:** Shape ($\beta$) and scale are fixed across all frames; floor alignment is enforced via minimum vertex height.
 
+-----
 
+## ⚠️ Limitations
 
-⸻
+  * **Hand Geometry:** Fine hand and finger geometry may be incomplete due to reconstruction sparsity.
+  * **Facial Expressions:** Limited by the quality of the initial scan.
+  * **Temporal Smoothing:** Currently, no temporal smoothing is applied across motion frames.
 
-⚠️ Limitations
-	•	Fine hand and finger geometry may be incomplete due to reconstruction sparsity
-	•	Facial expressions are limited by scan quality
-	•	No temporal smoothing across motion frames
+## 🚀 Future Work
 
-⸻
+  * [ ] Implement temporal consistency constraints during fitting.
+  * [ ] Improve hand reconstruction pipeline.
+  * [ ] Generate texture atlases for better realism.
+  * [ ] Enable real-time rendering via Vertex Animation Textures (VAT).
 
-🚀 Future Work
-	•	Temporal consistency constraints during fitting
-	•	Improved hand reconstruction
-	•	Texture atlas generation
-	•	Real-time rendering via Vertex Animation Textures (VAT)
+-----
 
-⸻
+## 📚 Acknowledgements
 
-📚 Acknowledgements
-	•	SMPL-X: AMASS / MPI
-	•	COLMAP / PyCOLMAP
-	•	MOYO Dataset
-	•	Segment Anything (SAM)
+  * [SMPL-X / AMASS / MPI](https://smpl-x.is.tue.mpg.de/)
+  * [COLMAP](https://colmap.github.io/) / [PyCOLMAP](https://github.com/colmap/pycolmap)
+  * [MOYO Dataset](https://moyo.is.tue.mpg.de/)
+  * [Segment Anything (SAM)](https://segment-anything.com/)
 
-⸻
+-----
 
-👤 Author
+## 👤 Author
 
-Vishal Purohit
-PhD Student — 3D Vision & Generative Models
-
-⸻
-
-📬 Contact
+**Vishal Purohit**
+*PhD Student — 3D Vision & Generative Models*
 
 For questions or collaborations, feel free to reach out.
