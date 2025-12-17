@@ -40,9 +40,6 @@ graph TD;
     H --> I[Motion Retargeting<br/>MOYO];
     I --> J[Final Animated Video];
 ````
-
-> **Note:** If the diagram above does not render, the flow is: RGB Images → Masking → COLMAP Reconstruction → Point Cloud Refinement → Poisson Mesh → Mesh Optimization → SMPL-X Fitting → Color Transfer → Motion Retargeting.
-
 -----
 
 ## 📁 Repository Structure
