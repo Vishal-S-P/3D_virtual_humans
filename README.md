@@ -169,11 +169,4 @@ Motion is retargeted using sequences from the **MOYO dataset**:
   * [MOYO Dataset](https://moyo.is.tue.mpg.de/)
   * [Segment Anything (SAM)](https://segment-anything.com/)
 
------
 
-## 👤 Author
-
-**Vishal Purohit**
-*PhD Student — 3D Vision & Generative Models*
-
-For questions or collaborations, feel free to reach out.
